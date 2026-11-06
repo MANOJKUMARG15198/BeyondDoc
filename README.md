@@ -7,7 +7,7 @@ documents do not cover the question.
 
 > **Informational demo only.** Not medical advice, not a diagnosis or treatment system. No patient data is used.
 
-Contents: [Setup](#setup) · [Architecture](#architecture-overview) · [More documentation](#more-documentation)
+Contents: [Setup](#setup) · [Architecture](#architecture-overview) · [Screenshots](#screenshots) · [More documentation](#more-documentation)
 
 ---
 
@@ -75,6 +75,38 @@ flowchart LR
 Identifiers are deterministic: chunk id = SHA-256 of document, version, section and content span; the index name
 encodes the chunking config and the embedding model, so a different chunking or model can never mix into an index.
 More detail: [docs/architecture.md](docs/architecture.md).
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/01-home.webp" alt="Home: ask a question about a medicine, with the four connected sources and example questions" width="900">
+  <br><sub><b>Home</b> — four connected sources (DailyMed, PMC, LiverTox, FDA letters), 5,815 passages, example questions</sub>
+</p>
+
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/02-answer-sources.webp" alt="Answer with numbered citations and the Sources panel" width="100%">
+      <br><sub><b>Cited answer + Sources</b> — every point cites a passage; the panel lists the retrieved passages with section and relevance</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/03-answer-notes.webp" alt="Answer with a follow-up question and the Notes panel" width="100%">
+      <br><sub><b>Follow-up + Notes</b> — the chat keeps context for follow-ups; evidence can be pinned to notes</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/04-settings-appearance.webp" alt="Settings: appearance with white, black and system themes" width="100%">
+      <br><sub><b>Settings · Appearance</b> — white, black or system theme; answer text size</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <img src="docs/screenshots/05-settings-privacy.webp" alt="Settings: privacy and data retention" width="100%">
+      <br><sub><b>Settings · Privacy &amp; data</b> — 90-day history, 24 h memory, anonymous id, demo disclaimer</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
