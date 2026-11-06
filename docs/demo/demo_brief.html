@@ -1,0 +1,289 @@
+<title>Beyond Doc Demo Brief</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column, styled like a drug monograph: numbered sections, label-style data tables, a teal accent from the app. */
+:root {
+  --bg: #fbfcfc; --panel: #ffffff; --ink: #14212b; --ink2: #44525d; --ink3: #74818b;
+  --line: #dde4e8; --line2: #c7d1d7; --accent: #00757a; --accentSoft: #e3f1f1;
+  --good: #1f7a46; --goodSoft: #e4f3ea; --warn: #9a5b00; --warnSoft: #fbf0dc; --bad: #a23a2c; --badSoft: #f8e6e2;
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1619; --panel: #151e22; --ink: #e6edf0; --ink2: #b3c0c7; --ink3: #84939b;
+  --line: #24323a; --line2: #33444d; --accent: #4fc2c2; --accentSoft: #15302f;
+  --good: #6fcf97; --goodSoft: #16301f; --warn: #e6b45c; --warnSoft: #33270f; --bad: #ef8a7a; --badSoft: #3a1c17; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1619; --panel: #151e22; --ink: #e6edf0; --ink2: #b3c0c7; --ink3: #84939b;
+  --line: #24323a; --line2: #33444d; --accent: #4fc2c2; --accentSoft: #15302f;
+  --good: #6fcf97; --goodSoft: #16301f; --warn: #e6b45c; --warnSoft: #33270f; --bad: #ef8a7a; --badSoft: #3a1c17; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 400 15.5px/1.6 var(--body); }
+.wrap { max-width: 920px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px; display: grid; gap: 44px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; color: var(--ink); margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); line-height: 1.12; font-weight: 650; }
+h2 { font-size: 25px; line-height: 1.25; font-weight: 650; display: flex; gap: 12px; align-items: baseline; }
+h2 .n { font: 500 13px/1 var(--mono); color: var(--accent); letter-spacing: .04em; }
+h3 { font-size: 18px; font-weight: 650; }
+p { margin: 0; max-width: 68ch; color: var(--ink2); }
+section { display: grid; gap: 16px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+header { display: grid; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 22px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font: 400 13px/1.5 var(--mono); color: var(--ink3); }
+.meta b { color: var(--ink); font-weight: 500; }
+.note { font-size: 13.5px; color: var(--ink3); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px; }
+nav.toc a { font: 500 12.5px/1 var(--body); color: var(--ink2); text-decoration: none; border: 1px solid var(--line2); border-radius: 999px; padding: 7px 11px; background: var(--panel); }
+nav.toc a:hover, nav.toc a:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 12px/1.3 var(--body); letter-spacing: .03em; text-transform: uppercase; color: var(--ink3); background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.pick td { background: var(--accentSoft); }
+tr.pick td:first-child { font-weight: 600; color: var(--ink); }
+.steps { display: grid; gap: 0; border-left: 2px solid var(--line2); margin-left: 6px; }
+.step { position: relative; padding: 0 0 18px 22px; display: grid; gap: 4px; }
+.step::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.step .k { font: 500 12px/1.3 var(--mono); color: var(--accent); }
+.step h3 { font-size: 16.5px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.box { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 14px 16px; display: grid; gap: 8px; min-width: 0; }
+.box h3 { font-size: 16px; }
+.box ul, section ul { margin: 0; padding-left: 18px; color: var(--ink2); display: grid; gap: 4px; max-width: 68ch; }
+.pill { display: inline-block; font: 600 11.5px/1 var(--body); letter-spacing: .03em; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.good { color: var(--good); background: var(--goodSoft); }
+.pill.warn { color: var(--warn); background: var(--warnSoft); }
+.pill.bad { color: var(--bad); background: var(--badSoft); }
+.pill.info { color: var(--accent); background: var(--accentSoft); }
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font: 500 13px/1.3 var(--body); }
+.flow span { border: 1px solid var(--line2); background: var(--panel); border-radius: 4px; padding: 6px 9px; color: var(--ink); }
+.flow i { font-style: normal; color: var(--ink3); }
+.callout { border-left: 3px solid var(--accent); background: var(--accentSoft); padding: 12px 16px; border-radius: 0 6px 6px 0; display: grid; gap: 6px; }
+.callout p { color: var(--ink); }
+code { font: 400 13px/1.4 var(--mono); background: var(--accentSoft); color: var(--ink); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.diagram { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 12px; }
+.diagram svg { display: block; min-width: 640px; width: 100%; height: auto; }
+.diagram text { font-family: var(--body); }
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 13px; color: var(--ink3); }
+a { color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { nav.toc a { transition: border-color .15s, color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Demo preparation · Medical RAG · 6 Nov 2026</div>
+    <h1>How Beyond Doc was built, tested and deployed</h1>
+    <p>A walkthrough for the demo: what was built from the first step, which options were tried and dropped, how each choice was decided with measurements, and how the system would grow to heavy traffic. Informational demo over public documents; not medical advice.</p>
+    <div class="meta">
+      <span>Live <b>&lt;demo-domain&gt;/medrag/</b> (password)</span>
+      <span>Code <b>commit 6a7d2aa</b></span>
+      <span>Corpus <b>100 documents · 5,815 chunks</b></span>
+      <span>Tests <b>366 unit + 9 integration</b></span>
+    </div>
+    <nav class="toc" aria-label="Sections">
+      <a href="#journey">Journey</a><a href="#chunking">Chunking</a><a href="#models">Models</a><a href="#evidence">How choices were decided</a><a href="#doc-aware">Document-aware retrieval</a><a href="#rerank">Why no reranker</a><a href="#answers">Answer style</a><a href="#scale">Heavy traffic</a><a href="#parity">Local vs web</a><a href="#open">Open items</a>
+    </nav>
+  </header>
+
+  <section id="journey">
+    <h2><span class="n">01</span>The journey, step by step</h2>
+    <p>Each step was planned, approved, implemented, tested and recorded before the next one started. Every choice marked provisional is still open in the decision log.</p>
+    <div class="steps">
+      <div class="step"><div class="k">Phase 0 · Foundation</div><h3>Repository, API skeleton, CI</h3><p>Python 3.11 + FastAPI with a <code>/health</code> endpoint, typed settings from <code>MEDRAG_*</code> variables, pinned dependencies, ruff, pytest, GitHub Actions, local OpenSearch 3.8.0 in Docker. No secrets in Git.</p></div>
+      <div class="step"><div class="k">Phase 1 · Corpus</div><h3>100 approved public documents</h3><p>70 DailyMed drug labels, 15 PubMed Central open-access articles, 10 FDA approval letters, 5 NIH LiverTox monographs. URL, version, date, licence basis and SHA-256 kept for every file; original files never modified; no patient data.</p></div>
+      <div class="step"><div class="k">Phase 2 · Parsing and chunking</div><h3>One parser per source, structure-aware chunks</h3><p>SPL (labels), JATS (PMC), LiverTox NXML and FDA PDF parsers; shared text normalisation; four chunking experiments (overlap 0/32/64/96 tokens). Result: 5,815 chunks with deterministic IDs.</p></div>
+      <div class="step"><div class="k">Phase 3 · Search and answers</div><h3>Embeddings, hybrid search, grounded answers, chat UI</h3><p>bge-base-en-v1.5 embeddings, one OpenSearch index with BM25 text and HNSW vectors, rank fusion (RRF), Claude Sonnet 5.5 answers that cite passage ids or abstain, the Beyond Doc chat UI with history (ClickHouse) and memory (Redis).</p></div>
+      <div class="step"><div class="k">Evaluation v1 → v2.0</div><h3>From a drafted test set to a frozen, reviewed one</h3><p>First 145 drafted questions, then a reviewed v2.0 set of 150 questions with evidence passages, frozen and split 75 dev / 75 holdout. Design decisions use dev only; holdout runs once at the end.</p></div>
+      <div class="step"><div class="k">Phase 4 · Reranking trial</div><h3>Cross-encoder reranker tested and rejected</h3><p>MiniLM-L6 reranking of the top 20 / 40: small ranking gain, 3.6 s added per question on CPU, and clinically wrong reorderings. Not adopted (details below).</p></div>
+      <div class="step"><div class="k">Retrieval v1.2</div><h3>Medicine-, source- and section-aware search (preset T3)</h3><p>Four deterministic rules on top of hybrid search, chosen by comparing eight variants on dev and confirmed once on holdout.</p></div>
+      <div class="step"><div class="k">Answer prompts v1 → v4.1</div><h3>Polite, step-by-step, cited, and safe on doses</h3><p>Five prompt versions tested end to end with Ragas; v4.1 answers related information instead of refusing, and never gives doses for uses the documents do not cover.</p></div>
+      <div class="step"><div class="k">Deployment</div><h3>A Linux server behind nginx, password protected</h3><p>Own OpenSearch, Redis and ClickHouse containers on local-only ports, a systemd service, and an nginx <code>/medrag/</code> location with basic auth. Same index and same results as the laptop.</p></div>
+    </div>
+  </section>
+
+  <section id="chunking">
+    <h2><span class="n">02</span>Chunking: the steps</h2>
+    <div class="flow" aria-label="Chunking pipeline"><span>Raw XML / PDF</span><i>→</i><span>Parse to sections</span><i>→</i><span>Normalise text</span><i>→</i><span>Split recursively ≤ 510 tokens</span><i>→</i><span>Add overlap</span><i>→</i><span>Prefix + metadata</span><i>→</i><span>Validate</span></div>
+    <ul>
+      <li><b>Structure first.</b> Chunks follow the document's own sections (for example <i>8.6 Renal Impairment</i>, <i>Case 2</i>, <i>Results</i>). A chunk never mixes two sections.</li>
+      <li><b>Recursive splitting.</b> When a section is too long it is split at the largest natural boundary that fits: block, then table rows, labelled cells, sentence, clause, phrase. In the corpus: 4,342 block splits, 759 row splits, 659 labelled-cell splits, 243 sentence splits.</li>
+      <li><b>Token ceiling.</b> 510 content tokens counted with the BERT uncased tokenizer, which has the same vocabulary as the embedding model, so 0 of 5,815 chunks are counted differently from what the model sees.</li>
+      <li><b>Tables kept as tables.</b> 1,411 table chunks in pipe format; 44 header rows inferred and flagged, 117 tables without headers flagged.</li>
+      <li><b>Excluded on purpose.</b> SPL Highlights (318 blocks, duplicates of the full label), package-label images (172), empty blocks (103).</li>
+      <li><b>Provenance on every chunk.</b> Document id, version, section path, section role (body, case report, bibliography…), medicine names, source URL; chunk id = SHA-256 of its content and position.</li>
+    </ul>
+    <div class="tbl"><table>
+      <thead><tr><th>Experiment</th><th class="num">Overlap</th><th class="num">Chunks</th><th class="num">Median tokens</th><th class="num">Text coverage</th><th class="num">Duplicated text</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>E1</td><td class="num">0</td><td class="num">5,815</td><td class="num">241</td><td class="num">100%</td><td class="num">0.00%</td><td>Tested</td></tr>
+        <tr><td>E2 (Fill mode)</td><td class="num">32</td><td class="num">5,815</td><td class="num">241</td><td class="num">100%</td><td class="num">0.53%</td><td>Tested</td></tr>
+        <tr class="pick"><td>E3 (Fill mode)</td><td class="num">64</td><td class="num">5,815</td><td class="num">244</td><td class="num">100%</td><td class="num">1.57%</td><td><span class="pill info">Demo default</span></td></tr>
+        <tr><td>E4 (Fill mode)</td><td class="num">96</td><td class="num">5,815</td><td class="num">248</td><td class="num">100%</td><td class="num">2.52%</td><td>Tested</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">All four runs lose no text and fail no validation. 64 tokens was chosen as the demo default because it keeps sentence context across chunk edges at a small duplication cost. A retrieval comparison across the four overlaps has not been run, so the overlap amount stays an open decision.</p>
+  </section>
+
+  <section id="models">
+    <h2><span class="n">03</span>Models considered and used</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Role</th><th>Used</th><th>Also considered</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Token counting</td><td>bert-base-uncased</td><td>BiomedBERT</td><td>BiomedBERT splits drug names less (1.46 vs 1.71 tokens per word), but bert-base-uncased matches the embedding model's vocabulary exactly, which is what the 510-token limit must protect.</td></tr>
+        <tr><td>Embeddings</td><td>BAAI/bge-base-en-v1.5 (768-d, pinned, checksum-verified)</td><td>MedCPT</td><td>Shortlist of two; bge-base chosen (MIT licence, CPU-friendly, strong general retrieval). MedCPT has not been benchmarked here.</td></tr>
+        <tr><td>Vector index</td><td>HNSW, Lucene engine, cosine</td><td>Flat, IVF</td><td>Demo default; at 5,815 chunks any of them is fast. To compare at full-corpus scale.</td></tr>
+        <tr><td>Keyword search</td><td>BM25 (OpenSearch, English analyzer)</td><td>Learned sparse (e.g. bge-m3)</td><td>BM25 catches exact drug names and numbers that dense search can blur.</td></tr>
+        <tr><td>Fusion</td><td>Reciprocal rank fusion (k = 60)</td><td>Score normalisation</td><td>No score calibration needed between BM25 and cosine; ranks stay inspectable.</td></tr>
+        <tr><td>Reranker</td><td>None</td><td>MiniLM-L6 cross-encoder (tested); MedCPT cross-encoder</td><td>See section 06.</td></tr>
+        <tr><td>Answers</td><td>Claude Sonnet 5.5, effort medium</td><td>Claude Opus 5.5</td><td>Same grounded answer in 4.0 s vs 8.1 s on the first live check.</td></tr>
+        <tr><td>Evaluation judge</td><td>Kimi K3 on Fireworks (temperature 0)</td><td>Claude Opus 5.5</td><td>A judge from a different model family, so the generator never grades itself.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="evidence">
+    <h2><span class="n">04</span>How a choice was judged better</h2>
+    <p>Every comparison uses fixed questions with known evidence passages, the same corpus and index, and one change at a time. Retrieval is scored without any LLM; answers are scored with Ragas.</p>
+    <div class="grid2">
+      <div class="box"><h3>Retrieval metrics (no LLM)</h3><ul><li><b>Evidence recall@8</b>: share of the needed evidence that reaches the 8 passages sent to the model.</li><li><b>AP@8, MRR, nDCG</b>: how high the evidence ranks.</li><li><b>Wrong-medicine passages</b>: passages about another drug in the top 8.</li><li><b>Latency</b>: P50 / P95 per stage.</li></ul></div>
+      <div class="box"><h3>Answer metrics (Ragas)</h3><ul><li><b>Faithfulness</b>: every claim supported by the passages.</li><li><b>Answer relevancy</b>, <b>claim recall</b>, <b>factual precision</b>.</li><li><b>Context precision / recall</b> as judged.</li><li><b>Abstention</b>: unanswerable questions refused; answerable ones never refused.</li></ul></div>
+    </div>
+    <h3>Step 1: keyword, dense or hybrid (first test set, 130 answerable questions)</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Retriever</th><th class="num">Hit@5</th><th class="num">Recall@10</th><th class="num">MRR@10</th><th class="num">nDCG@10</th><th class="num">P50 ms</th></tr></thead>
+      <tbody>
+        <tr><td>BM25 only</td><td class="num">0.677</td><td class="num">0.800</td><td class="num">0.525</td><td class="num">0.591</td><td class="num">16</td></tr>
+        <tr><td>Dense (bge, with query instruction)</td><td class="num">0.923</td><td class="num">0.946</td><td class="num">0.783</td><td class="num">0.821</td><td class="num">181</td></tr>
+        <tr class="pick"><td>Hybrid RRF (with instruction)</td><td class="num">0.885</td><td class="num">0.954</td><td class="num">0.706</td><td class="num">0.765</td><td class="num">189</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Dense ranked best on this set, but its questions were written from the gold passage, which favours paraphrase. Hybrid kept the highest recall and protects exact names and numbers, so hybrid stayed as the base.</p>
+    <h3>Step 2: the reviewed v2.0 set (150 questions, frozen, 75 dev / 75 holdout)</h3>
+    <p>Single-document, multi-document, interaction, pharmacology, LiverTox, PMC, FDA and unanswerable categories, each with evidence passages checked against the chunks. All later choices were made on dev; holdout ran once.</p>
+  </section>
+
+  <section id="doc-aware">
+    <h2><span class="n">05</span>Document-aware retrieval (Retrieval v1.2, preset T3)</h2>
+    <div class="grid2">
+      <div class="box"><span class="pill info">Rule 1</span><h3>Medicine resolver</h3><p>A corpus-built alias table maps brands, generics and salt forms (Lipitor → atorvastatin) to that medicine's documents. No LLM, no invented brand–generic links.</p></div>
+      <div class="box"><span class="pill info">Rule 2</span><h3>Medicine boost</h3><p>Soft keyword boost for the medicine's documents plus an extra vector search limited to them, fused with the normal results.</p></div>
+      <div class="box"><span class="pill info">Rule 3</span><h3>Source coverage</h3><p>When a question names two sources ("the label" and "LiverTox"), each source gets its own search and at least 2 of the 8 places.</p></div>
+      <div class="box"><span class="pill info">Rule 4</span><h3>Section awareness</h3><p>Reference lists, signatures and patient-leaflet tables move down (never removed); the section matching the question (Dosage, Adverse Reactions…) gets a small boost.</p></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Variant</th><th class="num">Dev recall@8</th><th class="num">Dev AP@8</th><th class="num">Wrong-medicine</th><th class="num">Holdout recall@8</th><th class="num">Holdout AP@8</th></tr></thead>
+      <tbody>
+        <tr><td>Hybrid baseline</td><td class="num">0.873</td><td class="num">0.597</td><td class="num">1.22</td><td class="num">0.904</td><td class="num">0.626</td></tr>
+        <tr><td>+ medicine boost (M2)</td><td class="num">0.896</td><td class="num">0.617</td><td class="num">0.13</td><td class="num">0.919</td><td class="num">0.623</td></tr>
+        <tr><td>+ source coverage (S2)</td><td class="num">0.910</td><td class="num">0.621</td><td class="num">0.19</td><td class="num">0.934</td><td class="num">0.629</td></tr>
+        <tr class="pick"><td>+ section awareness (T3)</td><td class="num">0.925</td><td class="num">0.650</td><td class="num">0.15</td><td class="num">0.949</td><td class="num">0.650</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">No question lost recall on either split. Multi-document questions on dev: 0.31 → 0.63. Retrieval latency 171 → 191 ms (P50) and 291 → 323 ms (P95) over 150 questions × 3 passes. End to end, Ragas context precision rose 0.717 → 0.766 and the gold passage was cited 0.90 → 0.94 of the time.</p>
+  </section>
+
+  <section id="rerank">
+    <h2><span class="n">06</span>Why re-ranking was skipped</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Measure (dev)</th><th class="num">Baseline</th><th class="num">MiniLM top 20</th><th class="num">T3 rules</th></tr></thead>
+      <tbody>
+        <tr><td>Evidence recall@8</td><td class="num">0.873</td><td class="num">0.873</td><td class="num">0.925</td></tr>
+        <tr><td>AP@8</td><td class="num">0.597</td><td class="num">0.625</td><td class="num">0.650</td></tr>
+        <tr><td>Wrong-medicine passages (Phase 4 measure)</td><td class="num">0.79</td><td class="num">0.69</td><td class="num">—</td></tr>
+        <tr><td>Wrong-medicine passages (v1.2 measure)</td><td class="num">1.22</td><td class="num">—</td><td class="num">0.15</td></tr>
+        <tr><td>Added latency (P50 / P95)</td><td class="num">—</td><td class="num">+3.6 s / +5.1 s</td><td class="num">+20 ms / +32 ms</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>Too slow on CPU:</b> 3.6 s median against a 0.5 s budget, about 10 times over; MedCPT's cross-encoder is about 5 times heavier.</li>
+      <li><b>Clinically wrong reorderings:</b> one interaction question ranked another drug's label first; LiverTox reference lists outranked the clinical overview.</li>
+      <li><b>No recall gain:</b> a reranker only reorders the candidates; it cannot bring in evidence that never reached them. The misses were coverage problems, which T3 fixes directly.</li>
+    </ul>
+    <p class="note">The two wrong-medicine rows use different medicine groupings (Phase 4's first grouping, then the v1.2 alias table), so compare within a row only. The reranker code stays in the repository for a future GPU trial.</p>
+  </section>
+
+  <section id="answers">
+    <h2><span class="n">07</span>Answer style: v1 → v4.1</h2>
+    <p>Users asked for polite answers that say plainly when there is no simple yes or no, give steps where the documents describe steps, and answer related questions ("best treatment for renal impairment") instead of refusing.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Prompt</th><th class="num">Faithfulness</th><th class="num">Answer relevancy</th><th class="num">Claim recall</th><th class="num">Gold cited</th><th>Unanswerable handling</th></tr></thead>
+      <tbody>
+        <tr><td>v1 original</td><td class="num">0.927</td><td class="num">0.868</td><td class="num">0.772</td><td class="num">0.940</td><td>8/8 refused</td></tr>
+        <tr><td>v2 polite + numbered</td><td class="num">0.899</td><td class="num">0.893</td><td class="num">0.818</td><td class="num">0.924</td><td>8/8 refused, 1 false refusal</td></tr>
+        <tr><td>v3 tuned style</td><td class="num">0.944</td><td class="num">0.886</td><td class="num">0.736</td><td class="num">0.910</td><td>8/8 refused</td></tr>
+        <tr><td>v4 related answers</td><td class="num">0.954</td><td class="num">0.894</td><td class="num">0.766</td><td class="num">0.910</td><td><span class="pill bad">2 gave doses for other uses</span></td></tr>
+        <tr class="pick"><td>v4.1 + dose safeguard</td><td class="num">0.948</td><td class="num">0.900</td><td class="num">0.775</td><td class="num">0.925</td><td><span class="pill good">3 refused, 5 "not in the documents", no doses</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">75 dev questions, one judge run each; differences under about 0.02 can be judge noise. Alpha-glucosidase inhibitors are still refused because no such document is in the corpus.</p>
+  </section>
+
+  <section id="scale">
+    <h2><span class="n">08</span>System design for heavy traffic, with control</h2>
+    <p>Today one server and one OpenSearch node serve a password-protected demo. Growing to thousands of users needs every stage to scale on its own and every expensive call to be capped, queued and observable, so a traffic spike slows the system down gracefully instead of failing.</p>
+    <div class="diagram" role="img" aria-label="Request path from users through the load balancer, API, embedding service, OpenSearch and the LLM gateway to Claude, with Redis and ClickHouse alongside">
+      <svg viewBox="0 0 860 270" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none" stroke="var(--line2)" stroke-width="1.5">
+          <path d="M118 70 H158"/><path d="M288 70 H328"/><path d="M458 70 H498"/><path d="M628 70 H668"/>
+          <path d="M393 100 V150"/><path d="M563 100 V150"/><path d="M733 100 V150"/><path d="M393 100 L250 150"/>
+        </g>
+        <g fill="var(--panel)" stroke="var(--line2)" stroke-width="1.2">
+          <rect x="8" y="40" width="110" height="60" rx="6"/><rect x="158" y="40" width="130" height="60" rx="6"/>
+          <rect x="328" y="40" width="130" height="60" rx="6"/><rect x="498" y="40" width="130" height="60" rx="6"/>
+          <rect x="668" y="40" width="130" height="60" rx="6"/>
+          <rect x="185" y="150" width="130" height="60" rx="6"/><rect x="328" y="150" width="130" height="60" rx="6"/>
+          <rect x="498" y="150" width="130" height="60" rx="6"/><rect x="668" y="150" width="130" height="60" rx="6"/>
+        </g>
+        <g fill="var(--ink)" font-size="13" font-weight="600" text-anchor="middle">
+          <text x="63" y="66">Users</text><text x="223" y="66">Load balancer</text><text x="393" y="66">API pods</text>
+          <text x="563" y="66">Embedder</text><text x="733" y="66">LLM gateway</text>
+          <text x="250" y="176">Redis</text><text x="393" y="176">ClickHouse</text><text x="563" y="176">OpenSearch ×3</text><text x="733" y="176">Claude API</text>
+        </g>
+        <g fill="var(--ink3)" font-size="11" text-anchor="middle">
+          <text x="63" y="84">browser, SSE</text><text x="223" y="84">WAF · rate limits</text><text x="393" y="84">stateless · autoscale</text>
+          <text x="563" y="84">batched · GPU/ONNX</text><text x="733" y="84">cap · queue · retry</text>
+          <text x="250" y="194">memory · quotas</text><text x="393" y="194">history · async</text><text x="563" y="194">replicas · alias swap</text><text x="733" y="194">rate-limit tier</text>
+        </g>
+        <text x="430" y="250" fill="var(--ink3)" font-size="11.5" text-anchor="middle">Tracing (Langfuse) and metrics on every hop: P50 / P95 per stage, cost per answer, error rate</text>
+      </svg>
+    </div>
+    <div class="grid2">
+      <div class="box"><h3>Controls that stop overload</h3><ul><li>Edge rate limits per IP and per user (load balancer / nginx), on top of today's 20 questions per minute per user.</li><li>LLM gateway with a global concurrency cap, a short queue, retries with backoff, and a clear "busy, try again" (the 503 path already exists).</li><li>Per-user daily quotas in Redis; sign-in before quotas are raised.</li><li>Answer cache for repeated questions (same question + same index + same prompt version).</li><li>Load shedding: skip the follow-up rewrite and serve retrieval-only results when the queue is long.</li></ul></div>
+      <div class="box"><h3>Scaling each stage</h3><ul><li>API: stateless pods, autoscaled on CPU and open streams.</li><li>Embedding: its own service, batched, on ONNX or a small GPU (today about 145 ms of each search).</li><li>OpenSearch: 3 nodes with replicas; new index built offline, then the alias switched (already how indexing works).</li><li>Chat history writes asynchronous; Redis managed with failover.</li><li>Secrets in a secret manager, never in images.</li></ul></div>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr><th>Planning numbers (concept, not load-tested)</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Users</td><td>10,000 registered</td></tr>
+        <tr><td>Design load</td><td>about 20 questions/s at peak (30% active, 20 questions/hour each)</td></tr>
+        <tr><td>Answers in flight</td><td>about 120 at design load (20/s × 6 s)</td></tr>
+        <tr><td>Proposed targets</td><td>first text P95 &lt; 1.5 s · full answer P95 &lt; 8 s · retrieval P95 &lt; 300 ms</td></tr>
+        <tr><td>Claude input at peak</td><td>about 6 M tokens/min, so a higher rate-limit tier or a Vertex AI quota is needed</td></tr>
+        <tr><td>Code changes first</td><td>stream answer text, async clients, embedding service, LLM gateway, cheaper follow-up rewrite, per-stage tracing</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Full concept with sizing and manifests: docs/SCALING_GCP_GKE.md (Google Cloud, GKE). Region, provider, SLOs and load target are still open decisions.</p>
+  </section>
+
+  <section id="parity">
+    <h2><span class="n">09</span>Local and web give the same answers</h2>
+    <div class="callout"><p>The web deployment matches the laptop because both run the same commit, the same 5,815-chunk index built from the same embeddings, the T3 retrieval preset and prompt v4.1. Three test searches returned exactly the same top 8 chunks on both machines (byte-identical result files). Retrieval is deterministic; the answer text can vary slightly in wording between runs because it is generated, while citations come from the same passages.</p></div>
+  </section>
+
+  <section id="open">
+    <h2><span class="n">10</span>Known limits and open decisions</h2>
+    <ul>
+      <li>Coverage is 70 medicines; anything else is refused or answered only from mentions inside other labels.</li>
+      <li>The v1.2 rules were designed on dev failures; the holdout check (68 answerable questions) is small.</li>
+      <li>Passage choice inside the right document still fails on a few questions (q077, q080, q083).</li>
+      <li>Not yet benchmarked: chunk overlap amount, MedCPT embeddings, vector algorithm at scale, learned sparse search, rerankers on GPU.</li>
+      <li>Demo hosting is a single server with password access; nothing is load-tested, and there is no production hardening.</li>
+    </ul>
+  </section>
+
+  <footer>Sources: docs/DECISION_LOG.md, docs/RETRIEVAL_V12_REPORT.md, docs/PHASE4_RERANKING_REPORT.md, docs/ANSWER_PROMPT_REPORT.md, docs/SCALING_GCP_GKE.md, chunking and evaluation reports in data/processed. Informational demo over public documents; not medical advice, diagnosis or treatment.</footer>
+</div>

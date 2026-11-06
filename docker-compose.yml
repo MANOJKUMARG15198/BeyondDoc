@@ -1,0 +1,64 @@
+# LOCAL DEVELOPMENT ONLY. Single node, security plugin disabled, bound to 127.0.0.1.
+# Not hardened for any shared, hosted or production use (ADR-003).
+services:
+  opensearch:
+    image: opensearchproject/opensearch:3.8.0
+    container_name: medrag-opensearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      # Heap sized for the demo corpus within Docker's 6 GB limit on this machine.
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    ports:
+      - "127.0.0.1:9200:9200"
+    volumes:
+      - medrag-opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  # Short-term chat memory (last turns per session) and per-user rate limits. Local dev only, no persistence.
+  redis:
+    image: redis:7.4.11-alpine
+    container_name: medrag-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Chat history (sessions and messages) with TTL retention. Local dev only; password from .env.
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.3
+    container_name: medrag-clickhouse
+    environment:
+      - CLICKHOUSE_DB=medrag
+      - CLICKHOUSE_USER=${MEDRAG_CLICKHOUSE_USER:-medrag}
+      - CLICKHOUSE_PASSWORD=${MEDRAG_CLICKHOUSE_PASSWORD:?set MEDRAG_CLICKHOUSE_PASSWORD in .env}
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+    ports:
+      - "127.0.0.1:8123:8123"
+    volumes:
+      - medrag-clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8123/ping || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  medrag-opensearch-data:
+  medrag-clickhouse-data:

@@ -1,0 +1,35 @@
+# Corpus and derived data stay out of Git (decision D3); publishing method decided later.
+data/*
+!data/README.md
+
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Frontend (dependencies and build output; rebuild with `npm run build` in frontend/)
+frontend/node_modules/
+src/medical_rag/api/static/app/
+
+# Tools / OS
+.idea/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
+
+# Site-specific notes (server names, users, addresses): never committed
+private/
+
+# Self-hosted Langfuse secrets
+deploy/langfuse/langfuse.env

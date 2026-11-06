@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Medical RAG Explorer</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1b1f24; --muted: #5d6673; --line: #dde1e6;
+  --accent: #1f6feb; --accent-ink: #ffffff; --soft: #eef3fd; --mark: #fff1a8;
+  --good: #1a7f37; --warn: #9a6700; --bad: #cf222e; --chip: #eef0f3;
+  --bm25: #8250df; --dense: #0a7ea4; --hybrid: #1f6feb;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f1216; --panel: #171b21; --ink: #e6e9ed; --muted: #9aa4b1; --line: #2a313a;
+    --accent: #4c8dff; --accent-ink: #0b0d10; --soft: #1a2433; --mark: #5a4b00;
+    --good: #3fb950; --warn: #d29922; --bad: #f85149; --chip: #222831; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 12px 20px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 5; }
+header h1 { font-size: 17px; margin: 0; }
+.info { color: var(--muted); font-size: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { background: var(--chip); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.pill.ok { color: var(--good); } .pill.off { color: var(--warn); }
+.disclaimer { background: var(--soft); color: var(--muted); font-size: 12px; padding: 6px 20px; border-bottom: 1px solid var(--line); }
+nav { display: flex; gap: 4px; margin-left: auto; }
+nav button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+nav button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+main { padding: 16px 20px 40px; max-width: 1500px; margin: 0 auto; }
+.searchbar { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 10px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+input[type=text] { flex: 1; min-width: 240px; padding: 10px 12px; font-size: 15px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+select, .btn { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); font-size: 13px; }
+.btn { cursor: pointer; } .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--panel); color: var(--ink); padding: 7px 12px; cursor: pointer; font-size: 13px; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; } .seg button.active { background: var(--soft); color: var(--accent); font-weight: 600; }
+label.chk { font-size: 13px; color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
+.samples { display: flex; gap: 6px; flex-wrap: wrap; } .samples button { border: 1px dashed var(--line); background: transparent; color: var(--muted); border-radius: 999px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
+.samples button:hover { color: var(--accent); border-color: var(--accent); }
+.status { color: var(--muted); font-size: 12px; margin: 10px 2px; min-height: 18px; }
+.cols { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.cols.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .cols.three { grid-template-columns: 1fr; } }
+.col h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; margin: 4px 2px 8px; display: flex; justify-content: space-between; color: var(--muted); }
+.col h2 b { color: var(--ink); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.card.j-relevant { border-left: 4px solid var(--good); } .card.j-partial { border-left: 4px solid var(--warn); } .card.j-not { border-left: 4px solid var(--bad); }
+.card .top { display: flex; gap: 8px; align-items: baseline; }
+.rank { font-weight: 700; color: var(--muted); min-width: 22px; }
+.title { font-weight: 600; } .path { color: var(--muted); font-size: 12px; }
+.meta { display: flex; gap: 5px; flex-wrap: wrap; margin: 6px 0; font-size: 11px; }
+.tag { background: var(--chip); padding: 1px 7px; border-radius: 6px; color: var(--muted); }
+.tag.bm25 { color: var(--bm25); } .tag.dense { color: var(--dense); } .tag.notice { color: var(--warn); }
+.text { white-space: pre-wrap; word-break: break-word; font-size: 13px; max-height: 9.2em; overflow: hidden; position: relative; }
+.text.mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+.text.open { max-height: none; }
+mark { background: var(--mark); color: inherit; padding: 0 1px; border-radius: 2px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.actions button, .actions a { font-size: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 3px 8px; cursor: pointer; text-decoration: none; }
+.actions .j button.on.relevant { background: var(--good); color: #fff; border-color: var(--good); }
+.actions .j button.on.partial { background: var(--warn); color: #fff; border-color: var(--warn); }
+.actions .j button.on.not { background: var(--bad); color: #fff; border-color: var(--bad); }
+.j { display: inline-flex; gap: 4px; margin-left: auto; }
+.timings { font-size: 11px; color: var(--muted); margin: -2px 2px 8px; }
+.empty { color: var(--muted); padding: 30px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; }
+.judgebar { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 12px; flex-wrap: wrap; }
+/* drawer */
+.drawer { position: fixed; inset: 0 0 0 auto; width: min(760px, 100%); background: var(--panel); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0,0,0,.15); transform: translateX(100%); transition: transform .2s; z-index: 10; display: flex; flex-direction: column; }
+.drawer.open { transform: none; }
+.drawer header { position: static; }
+.drawer .body { overflow: auto; padding: 14px 18px 30px; }
+.drawer h3 { margin: 16px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.kv { display: grid; grid-template-columns: 150px 1fr; gap: 3px 12px; font-size: 12px; }
+.kv div:nth-child(odd) { color: var(--muted); }
+.box { border: 1px solid var(--line); border-radius: 8px; padding: 10px; white-space: pre-wrap; word-break: break-word; font-size: 13px; background: var(--bg); }
+.box.dim { opacity: .75; } .ov { background: rgba(130, 80, 223, .18); border-radius: 2px; }
+.legend { font-size: 11px; color: var(--muted); }
+/* ask */
+.answer { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 14px; }
+.answer .txt { font-size: 15px; white-space: pre-wrap; }
+.answer .cite { color: var(--accent); font-weight: 600; cursor: pointer; }
+.banner { border-radius: 10px; padding: 10px 14px; margin-top: 12px; font-size: 13px; }
+.banner.warn { background: rgba(210,153,34,.15); color: var(--warn); border: 1px solid rgba(210,153,34,.4); }
+.banner.bad { background: rgba(207,34,46,.12); color: var(--bad); border: 1px solid rgba(207,34,46,.35); }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Medical RAG Explorer</h1>
+  <div class="info" id="info"><span class="pill">loading…</span></div>
+  <nav>
+    <button id="tab-search" class="active" onclick="showTab('search')">Search &amp; compare</button>
+    <button id="tab-ask" onclick="showTab('ask')">Ask</button>
+  </nav>
+</header>
+<div class="disclaimer" id="disclaimer">Informational demo over public documents. Not medical advice; not a diagnosis or treatment system.</div>
+
+<main>
+<section id="view-search">
+  <div class="searchbar">
+    <div class="row">
+      <input type="text" id="q" placeholder="Ask about a medicine, e.g. starting dose of atorvastatin" autofocus>
+      <button class="btn primary" onclick="runSearch()">Search</button>
+    </div>
+    <div class="row">
+      <div class="seg" id="modes">
+        <button data-mode="compare" class="active">Compare all 3</button>
+        <button data-mode="hybrid">Hybrid (RRF)</button>
+        <button data-mode="bm25">BM25</button>
+        <button data-mode="dense">Dense</button>
+      </div>
+      <select id="k" title="results per mode"><option>5</option><option selected>8</option><option>10</option><option>20</option></select>
+      <span class="legend">Sources:</span>
+      <label class="chk"><input type="checkbox" value="dailymed" checked> DailyMed</label>
+      <label class="chk"><input type="checkbox" value="pmc_oa" checked> PMC</label>
+      <label class="chk"><input type="checkbox" value="nih_livertox" checked> LiverTox</label>
+      <label class="chk"><input type="checkbox" value="fda_drugsatfda" checked> FDA letters</label>
+    </div>
+    <div class="samples" id="samples"></div>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="judgebar">
+    <span id="judgecount">0 judgments saved in this browser</span>
+    <button class="btn" onclick="exportJudgments()">Export judgments (JSON)</button>
+    <button class="btn" onclick="clearJudgments()">Clear</button>
+    <span class="legend">Mark each result Relevant / Partial / Not to measure precision; nothing is sent to the server.</span>
+  </div>
+  <div class="cols" id="results"><div class="empty">Enter a question to see what each retriever returns.</div></div>
+</section>
+
+<section id="view-ask" class="hidden">
+  <div class="searchbar">
+    <div class="row">
+      <input type="text" id="aq" placeholder="Ask a question; the answer must cite retrieved passages">
+      <select id="ak"><option>5</option><option selected>8</option><option>10</option></select>
+      <button class="btn primary" id="askbtn" onclick="runAsk()">Ask</button>
+    </div>
+  </div>
+  <div id="askstate"></div>
+  <div id="askout"></div>
+</section>
+</main>
+
+<aside class="drawer" id="drawer">
+  <header><h1 id="d-title">Chunk</h1><nav><button onclick="closeDrawer()">Close</button></nav></header>
+  <div class="body" id="d-body"></div>
+</aside>
+
+<script>
+const SAMPLES = [
+  "starting dose of atorvastatin", "Can warfarin be taken with aspirin?", "boxed warning for Synthroid",
+  "sertraline use during pregnancy", "metformin and kidney function", "lisinopril angioedema",
+  "gabapentin dose adjustment in renal impairment", "liver injury caused by atorvastatin",
+];
+const STOP = new Set("the and for with what are can how does from that this when which about into have has was were will dose".split(" "));
+let mode = "compare", INFO = null, LAST = null;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function terms(q) {
+  return [...new Set(q.toLowerCase().match(/[a-z0-9]{3,}/g) || [])].filter((t) => !STOP.has(t));
+}
+function highlight(text, q) {
+  let html = esc(text);
+  const ts = terms(q);
+  if (!ts.length) return html;
+  const re = new RegExp("\\b(" + ts.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi");
+  return html.replace(re, "<mark>$1</mark>");
+}
+
+async function api(path, body) {
+  const opts = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+  const r = await fetch(path.replace(/^\//, ""), opts); // relative: works at / and under a sub-path (/medrag/)
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)) : r.statusText);
+  return data;
+}
+
+async function loadInfo() {
+  try {
+    INFO = await api("/info");
+    const src = Object.entries(INFO.chunks_by_source).map(([k, v]) => `${k} ${v}`).join(" · ");
+    $("info").innerHTML = `<span class="pill">${esc(INFO.chunks ?? "?")} chunks</span><span class="pill">${esc(src)}</span>
+      <span class="pill">${esc(INFO.embedding_model)}</span>
+      <span class="pill ${INFO.llm_configured ? "ok" : "off"}">${INFO.llm_configured ? "answers: " + esc(INFO.llm_model) : "answers off (no API key)"}</span>`;
+    $("disclaimer").textContent = INFO.disclaimer;
+    renderAskState();
+  } catch (e) {
+    $("info").innerHTML = `<span class="pill off">API unavailable: ${esc(e.message)}</span>`;
+  }
+}
+
+// ---------- judgments (browser only) ----------
+const JKEY = "medrag-judgments-v1";
+function loadJ() { try { return JSON.parse(localStorage.getItem(JKEY) || "{}"); } catch { return {}; } }
+function saveJ(j) { try { localStorage.setItem(JKEY, JSON.stringify(j)); } catch {} updateJCount(); }
+function jid(q, c) { return q.trim().toLowerCase() + "\u0001" + c; }
+function updateJCount() { $("judgecount").textContent = `${Object.keys(loadJ()).length} judgments saved in this browser`; }
+function judge(q, p, label, btn) {
+  const j = loadJ(), key = jid(q, p.chunk_id);
+  if (j[key]?.label === label) delete j[key];
+  else j[key] = { query: q, chunk_id: p.chunk_id, document_id: p.document_id, title: p.title, section_path: p.section_path, label, at: new Date().toISOString() };
+  saveJ(j);
+  if (LAST) renderResults(LAST);
+}
+function exportJudgments() {
+  const blob = new Blob([JSON.stringify(Object.values(loadJ()), null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "retrieval_judgments.json"; a.click();
+}
+function clearJudgments() { if (confirm("Delete all judgments saved in this browser?")) { saveJ({}); if (LAST) renderResults(LAST); } }
+
+// ---------- search ----------
+function sources() { return [...document.querySelectorAll("#view-search input[type=checkbox]:checked")].map((c) => c.value); }
+
+async function runSearch() {
+  const q = $("q").value.trim();
+  if (q.length < 3) { $("status").textContent = "Type at least 3 characters."; return; }
+  const k = +$("k").value, src = sources();
+  if (!src.length) { $("status").textContent = "Select at least one source."; return; }
+  const modes = mode === "compare" ? ["hybrid", "bm25", "dense"] : [mode];
+  $("status").textContent = "Searching…";
+  const t0 = performance.now();
+  try {
+    const res = await Promise.all(modes.map((m) => api("/search", { query: q, mode: m, k, sources: src.length === 4 ? null : src })));
+    LAST = { q, modes, res };
+    renderResults(LAST);
+    $("status").textContent = `${modes.length} retriever${modes.length > 1 ? "s" : ""} · round trip ${Math.round(performance.now() - t0)} ms`;
+  } catch (e) { $("status").textContent = "Search failed: " + e.message; }
+}
+
+function overlapWith(res, chunkId) {
+  return res.filter((r) => r.passages.some((p) => p.chunk_id === chunkId)).length;
+}
+
+function renderResults({ q, modes, res }) {
+  const el = $("results"), J = loadJ();
+  el.className = "cols" + (modes.length > 1 ? " three" : "");
+  el.innerHTML = "";
+  modes.forEach((m, i) => {
+    const r = res[i], col = document.createElement("div");
+    col.className = "col";
+    const judged = r.passages.map((p) => J[jid(q, p.chunk_id)]?.label).filter(Boolean);
+    const rel = judged.filter((l) => l === "relevant").length, part = judged.filter((l) => l === "partial").length;
+    const prec = judged.length ? ` · judged ${judged.length}/${r.passages.length}: ${rel} relevant, ${part} partial` : "";
+    col.innerHTML = `<h2><b>${m === "hybrid" ? "Hybrid (RRF)" : m === "bm25" ? "BM25" : "Dense (bge)"}</b><span>${r.passages.length} results${prec}</span></h2>
+      <div class="timings">${Object.entries(r.timings_ms).map(([k, v]) => `${k.replace("_ms", "")} ${v} ms`).join(" · ")}</div>`;
+    if (!r.passages.length) col.innerHTML += `<div class="empty">No results.</div>`;
+    r.passages.forEach((p) => col.appendChild(card(q, p, modes.length > 1 ? overlapWith(res, p.chunk_id) : 0, J[jid(q, p.chunk_id)]?.label)));
+    el.appendChild(col);
+  });
+}
+
+function card(q, p, seenIn, label) {
+  const d = document.createElement("div");
+  d.className = "card" + (label ? " j-" + label : "");
+  const ranks = Object.entries(p.component_ranks || {}).map(([k, v]) => `<span class="tag ${k}">${k} #${v}</span>`).join("");
+  const notices = (p.notices || []).map((n) => `<span class="tag notice">${esc(n)}</span>`).join("");
+  d.innerHTML = `
+    <div class="top"><span class="rank">${p.rank}</span><div><div class="title">${esc(p.title)}</div><div class="path">${esc(p.section_path || "")}</div></div></div>
+    <div class="meta"><span class="tag">${esc(p.source)}</span><span class="tag">${esc(p.kind || "")}</span><span class="tag">${esc(p.section_role || "")}</span>
+      <span class="tag">${p.token_count ?? "?"} tok</span>${ranks}${seenIn > 1 ? `<span class="tag">in ${seenIn}/3 lists</span>` : ""}${notices}
+      <span class="tag" title="RRF or native score">score ${(+p.score).toFixed(4)}</span></div>
+    <div class="text ${p.kind === "table" ? "mono" : ""}">${highlight(p.text, q)}</div>
+    <div class="actions">
+      <button class="more">Expand</button>
+      <button class="inspect">Inspect chunk</button>
+      <a href="${esc(p.source_reference)}" target="_blank" rel="noopener noreferrer">Source ↗</a>
+      <span class="j">${["relevant", "partial", "not"].map((l) => `<button class="${l} ${label === l ? "on" : ""}" data-l="${l}">${l === "not" ? "Not" : l[0].toUpperCase() + l.slice(1)}</button>`).join("")}</span>
+    </div>`;
+  const txt = d.querySelector(".text");
+  d.querySelector(".more").onclick = (e) => { txt.classList.toggle("open"); e.target.textContent = txt.classList.contains("open") ? "Collapse" : "Expand"; };
+  d.querySelector(".inspect").onclick = () => openChunk(p.chunk_id, q);
+  d.querySelectorAll(".j button").forEach((b) => (b.onclick = () => judge(q, p, b.dataset.l, b)));
+  return d;
+}
+
+// ---------- chunk inspector ----------
+function overlapLen(prev, cur) {
+  // longest suffix of prev that is a prefix of cur (overlap copied from the previous chunk)
+  const max = Math.min(prev.length, cur.length, 2000);
+  for (let n = max; n >= 20; n--) if (prev.endsWith(cur.slice(0, n))) return n;
+  return 0;
+}
+function chunkBox(c, q, cls, ovStart, ovEnd) {
+  let t = c.text, html;
+  if (ovStart) html = `<span class="ov">${esc(t.slice(0, ovStart))}</span>${highlight(t.slice(ovStart), q)}`;
+  else if (ovEnd) html = `${highlight(t.slice(0, t.length - ovEnd), q)}<span class="ov">${esc(t.slice(t.length - ovEnd))}</span>`;
+  else html = highlight(t, q);
+  return `<div class="box ${cls} ${c.kind === "table" ? "text mono open" : ""}">${html}</div>`;
+}
+async function openChunk(id, q) {
+  $("drawer").classList.add("open");
+  $("d-body").innerHTML = "Loading…";
+  try {
+    const d = await api("/chunks/" + encodeURIComponent(id));
+    const c = d.chunk;
+    $("d-title").textContent = c.title;
+    const ovPrev = d.previous ? overlapLen(d.previous.text, c.text) : 0;
+    const ovNext = d.next ? overlapLen(c.text, d.next.text) : 0;
+    const rows = [
+      ["chunk_id", c.chunk_id], ["document", `${c.document_id} (v${c.document_version ?? "?"})`],
+      ["position", `${(c.ordinal ?? 0) + 1} of ${d.document_chunks}`], ["section", c.section_path], ["role / evidence", `${c.section_role} / ${c.evidence_type}`],
+      ["kind", c.kind], ["tokens (BERT, with prefix)", c.token_count], ["overlap from previous chunk", `${c.overlap_tokens} tokens (0 at a section start)`],
+      ["split levels", (c.split_levels || []).join(", ")], ["notices", (c.notices || []).join(", ") || "none"],
+      ["medicine names", (c.medicine_names || []).join(", ")],
+    ];
+    $("d-body").innerHTML = `
+      <div class="kv">${rows.map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join("")}
+        <div>source</div><div><a href="${esc(c.source_reference)}" target="_blank" rel="noopener noreferrer">${esc(c.source_reference)}</a></div></div>
+      <h3>Prefix (embedded and searched with the text)</h3><div class="box">${esc(c.prefix)}</div>
+      <p class="legend">Purple = overlap text shared with the neighbouring chunk (${ovPrev} chars from previous, ${ovNext} chars into next).</p>
+      <h3>Previous chunk ${d.previous ? "· " + esc(d.previous.section_path || "") : ""}</h3>${d.previous ? chunkBox(d.previous, q, "dim", 0, ovPrev) : '<div class="legend">first chunk of the document</div>'}
+      <h3>This chunk</h3>${chunkBox(c, q, "", ovPrev, 0)}
+      <h3>Next chunk ${d.next ? "· " + esc(d.next.section_path || "") : ""}</h3>${d.next ? chunkBox(d.next, q, "dim", 0, 0) : '<div class="legend">last chunk of the document</div>'}`;
+  } catch (e) { $("d-body").innerHTML = `<div class="banner bad">${esc(e.message)}</div>`; }
+}
+function closeDrawer() { $("drawer").classList.remove("open"); }
+
+// ---------- ask ----------
+function renderAskState() {
+  const off = INFO && !INFO.llm_configured;
+  $("askbtn").disabled = off;
+  $("askstate").innerHTML = off ? `<div class="banner warn">Answers are off: add <code>ANTHROPIC_API_KEY</code> to your local <code>.env</code> and restart the server. Retrieval testing works without it.</div>` : "";
+}
+async function runAsk() {
+  const q = $("aq").value.trim();
+  if (q.length < 3) return;
+  $("askout").innerHTML = `<div class="status">Retrieving and answering…</div>`;
+  try {
+    const a = await api("/ask", { question: q, k: +$("ak").value });
+    const byId = Object.fromEntries(a.citations.map((c) => [c.source_id, c]));
+    const txt = esc(a.answer).replace(/\[(S\d+)\]/g, (m, s) => byId[s] ? `<span class="cite" data-c="${esc(byId[s].chunk_id)}" title="${esc(byId[s].title + " — " + byId[s].section_path)}">[${s}]</span>` : m);
+    $("askout").innerHTML = `
+      ${a.abstained ? `<div class="banner warn">Abstained (${esc(a.abstain_reason)}).</div>` : ""}
+      <div class="answer"><div class="txt">${txt}</div>
+        <div class="timings" style="margin-top:10px">${esc(a.model)} · ${Object.entries(a.timings_ms).map(([k, v]) => `${k.replace("_ms", "")} ${v} ms`).join(" · ")}</div>
+        ${a.citations.length ? `<h3 class="legend">Citations</h3>` + a.citations.map((c) => `<div class="legend">[${esc(c.source_id)}] ${esc(c.title)} — ${esc(c.section_path)} · <a href="${esc(c.source_reference)}" target="_blank" rel="noopener noreferrer">source ↗</a> · <a href="#" data-c="${esc(c.chunk_id)}" class="cite">inspect</a></div>`).join("") : ""}
+      </div>
+      <h3 class="legend" style="margin-top:16px">Retrieved passages sent to the model</h3><div id="askret"></div>
+      <p class="legend">${esc(a.disclaimer)}</p>`;
+    const ret = $("askret");
+    a.retrieved.forEach((p) => ret.appendChild(card(q, p, 0, loadJ()[jid(q, p.chunk_id)]?.label)));
+    document.querySelectorAll("#askout .cite").forEach((n) => (n.onclick = (e) => { e.preventDefault(); openChunk(n.dataset.c, q); }));
+  } catch (e) { $("askout").innerHTML = `<div class="banner bad">${esc(e.message)}</div>`; }
+}
+
+// ---------- wiring ----------
+function showTab(t) {
+  $("view-search").classList.toggle("hidden", t !== "search"); $("view-ask").classList.toggle("hidden", t !== "ask");
+  $("tab-search").classList.toggle("active", t === "search"); $("tab-ask").classList.toggle("active", t === "ask");
+}
+document.querySelectorAll("#modes button").forEach((b) => (b.onclick = () => {
+  document.querySelectorAll("#modes button").forEach((x) => x.classList.remove("active"));
+  b.classList.add("active"); mode = b.dataset.mode; if ($("q").value.trim()) runSearch();
+}));
+$("samples").innerHTML = SAMPLES.map((s) => `<button>${esc(s)}</button>`).join("");
+$("samples").querySelectorAll("button").forEach((b) => (b.onclick = () => { $("q").value = b.textContent; runSearch(); }));
+$("q").addEventListener("keydown", (e) => { if (e.key === "Enter") runSearch(); });
+$("aq").addEventListener("keydown", (e) => { if (e.key === "Enter") runAsk(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+updateJCount();
+loadInfo();
+</script>
+</body>
+</html>

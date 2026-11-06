@@ -1,0 +1,27 @@
+# Runtime dependencies, pinned to the versions tested on 2026-11-03 (Python 3.11.7, Windows 11).
+# Decision ADR-018: pip + pinned requirements. Transitive dependencies are not locked.
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.2
+pydantic-settings==2.16.2
+opensearch-py==3.2.0
+httpx==0.28.1
+pypdf==6.21.4
+tokenizers==0.23.3  # chunk token counting with bert-base-uncased (P2-1, ADR-010)
+huggingface_hub==2.4.0
+# Embedding (ADR-011), tested 2026-11-04. Install torch from the CPU index:
+#   pip install --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple -r requirements.txt
+torch==2.10.0
+sentence-transformers==5.2.2
+transformers==5.22.1  # 5.2.0 would downgrade tokenizers to 0.22.2
+numpy==2.4.6
+# Generation and evaluation (ADR-016 demo default, ADR-005), tested 2026-11-04. Set RAGAS_DO_NOT_TRACK=true.
+anthropic==2.4.0
+openai==1.109.1  # OpenAI-compatible client for the Kimi K3 Ragas judge (Moonshot API); also a ragas dependency
+ragas==0.4.3
+langchain-community==0.3.31  # ragas 0.4.3 fails to import with 0.4.x
+# Chat sessions (tested 2026-11-05): Redis short-term memory, ClickHouse history.
+redis==8.1.0
+clickhouse-connect==1.12.0
+# Tracing (ADR-008), tested 2026-11-06: Langfuse Cloud or self-hosted (server image 4.69.0). OpenTelemetry-based.
+langfuse==5.0.4

@@ -1,0 +1,26 @@
+[Unit]
+Description=Medical RAG demo API (FastAPI) on 127.0.0.1:8400, served by nginx at /medrag/
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Replace medrag with the account that owns /opt/medrag (docs/INSTALL.md, server step 1).
+User=medrag
+Group=medrag
+WorkingDirectory=/opt/medrag/app
+EnvironmentFile=/opt/medrag/medrag.env
+Environment=HF_HOME=/opt/medrag/hf-cache
+Environment=HF_HUB_OFFLINE=1
+Environment=RAGAS_DO_NOT_TRACK=true
+Environment=OMP_NUM_THREADS=4
+ExecStart=/opt/medrag/venv/bin/uvicorn medical_rag.api.main:app --host 127.0.0.1 --port 8400 --workers 2 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=on-failure
+RestartSec=5
+CPUQuota=800%
+MemoryMax=6G
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

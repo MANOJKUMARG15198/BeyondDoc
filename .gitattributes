@@ -1,0 +1,4 @@
+# Server-side files must keep LF endings (git archive applies core.autocrlf on Windows).
+deploy/** text eol=lf
+*.sh text eol=lf
+*.service text eol=lf
